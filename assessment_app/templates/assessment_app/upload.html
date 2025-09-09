@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video - Sports Assessment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(111,66,193,0.8) 0%, rgba(52,58,64,0.8) 100%), 
+                        url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat fixed;
+            min-height: 100vh;
+        }
+        
+        .upload-section {
+            padding: 2rem 0;
+        }
+        
+        .upload-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+        
+        .upload-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+        
+        .navbar {
+            background: rgba(111,66,193,0.9) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #6f42c1, #343a40) !important;
+            border-radius: 25px 25px 0 0 !important;
+            padding: 2rem;
+        }
+        
+        .upload-zone {
+            border: 3px dashed #6f42c1;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(111,66,193,0.05), rgba(52,58,64,0.05));
+            transition: all 0.3s ease;
+            margin: 2rem 0;
+            cursor: pointer;
+        }
+        
+        .upload-zone:hover {
+            border-color: #343a40;
+            background: linear-gradient(135deg, rgba(111,66,193,0.1), rgba(52,58,64,0.1));
+            transform: scale(1.02);
+        }
+        
+        .upload-zone.dragover {
+            border-color: #28a745;
+            background: linear-gradient(135deg, rgba(40,167,69,0.1), rgba(111,66,193,0.1));
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid rgba(111,66,193,0.2);
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #6f42c1;
+            box-shadow: 0 0 0 0.2rem rgba(111,66,193,0.25);
+            transform: scale(1.02);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6f42c1, #343a40);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(111,66,193,0.3);
+            font-size: 1.2rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(111,66,193,0.4);
+            background: linear-gradient(135deg, #343a40, #6f42c1);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: #6f42c1;
+            margin-bottom: 1rem;
+            display: block;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .supported-formats {
+            background: rgba(111,66,193,0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .format-badge {
+            background: linear-gradient(135deg, #6f42c1, #343a40);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            margin: 0.25rem;
+            font-weight: 600;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .progress {
+            height: 20px;
+            border-radius: 10px;
+            background: rgba(111,66,193,0.1);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(135deg, #6f42c1, #343a40);
+            border-radius: 10px;
+        }
+        
+        .floating-video-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .floating-video-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: floatVideo 20s infinite linear;
+        }
+        
+        @keyframes floatVideo {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.1; }
+            90% { opacity: 0.1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        .video-icon-1 { left: 15%; animation-delay: 0s; }
+        .video-icon-2 { left: 25%; animation-delay: 4s; }
+        .video-icon-3 { left: 35%; animation-delay: 8s; }
+        .video-icon-4 { left: 45%; animation-delay: 12s; }
+        .video-icon-5 { left: 55%; animation-delay: 16s; }
+        .video-icon-6 { left: 65%; animation-delay: 2s; }
+        .video-icon-7 { left: 75%; animation-delay: 6s; }
+        .video-icon-8 { left: 85%; animation-delay: 10s; }
+    </style>
+</head>
+<body>
+    <div class="floating-video-icons">
+        <div class="floating-video-icon video-icon-1">📹</div>
+        <div class="floating-video-icon video-icon-2">🎥</div>
+        <div class="floating-video-icon video-icon-3">📸</div>
+        <div class="floating-video-icon video-icon-4">🎬</div>
+        <div class="floating-video-icon video-icon-5">📱</div>
+        <div class="floating-video-icon video-icon-6">💻</div>
+        <div class="floating-video-icon video-icon-7">🖥️</div>
+        <div class="floating-video-icon video-icon-8">⚡</div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">🏆 Sports Assessment</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/upload/">Upload Video</a>
+                <a class="nav-link" href="/history/">History</a>
+                {% if user.is_authenticated %}
+                <a class="nav-link" href="/admin/logout/">Logout ({{ user.username }})</a>
+                {% else %}
+                <a class="nav-link" href="/admin/login/">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container upload-section">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card upload-card">
+                    <div class="card-header text-white text-center">
+                        <h2 class="mb-0">🎯 Upload Video for AI Analysis</h2>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <h4 class="text-primary">Transform Your Performance with AI 🚀</h4>
+                            <p class="text-muted">Upload your sports video and get instant professional feedback powered by advanced AI technology</p>
+                        </div>
+
+                        <form method="post" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label for="id_sport_type" class="form-label">🏃‍♂️ Select Your Sport</label>
+                                {{ form.sport_type }}
+                            </div>
+                            
+                            <div class="upload-zone" id="uploadZone">
+                                <span class="upload-icon">📤</span>
+                                <h5 class="text-primary mb-3">Drag & Drop Your Video Here</h5>
+                                <p class="text-muted mb-3">or click to browse files</p>
+                                {{ form.video }}
+                            </div>
+                            
+                            <div class="supported-formats">
+                                <h6 class="text-primary mb-3">📋 Supported Formats & Requirements:</h6>
+                                <div class="mb-2">
+                                    <span class="format-badge">MP4</span>
+                                    <span class="format-badge">AVI</span>
+                                    <span class="format-badge">MOV</span>
+                                    <span class="format-badge">MKV</span>
+                                </div>
+                                <small class="text-muted">Maximum file size: 100MB | Best quality: 1080p HD</small>
+                            </div>
+
+                            <div class="progress-container" id="progressContainer">
+                                <h6 class="text-primary mb-2">⏳ Uploading Video...</h6>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">Please wait while we process your video...</small>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    🔬 Analyze My Performance
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-5 text-center">
+                            <h6 class="text-primary mb-3">🎯 What You'll Get:</h6>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <h5>📊 Performance Metrics</h5>
+                                        <small class="text-muted">Detailed analysis of your technique</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <h5>🎯 Accuracy Score</h5>
+                                        <small class="text-muted">Professional rating out of 10</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <h5>💡 Improvement Tips</h5>
+                                        <small class="text-muted">AI-powered recommendations</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced upload functionality
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.querySelector('input[type="file"]');
+        const form = document.getElementById('uploadForm');
+        const progressContainer = document.getElementById('progressContainer');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Drag and drop functionality
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateUploadText(files[0].name);
+            }
+        });
+
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateUploadText(e.target.files[0].name);
+            }
+        });
+
+        function updateUploadText(filename) {
+            const uploadIcon = uploadZone.querySelector('.upload-icon');
+            const uploadText = uploadZone.querySelector('h5');
+            const uploadSubtext = uploadZone.querySelector('p');
+            
+            uploadIcon.textContent = '✅';
+            uploadText.textContent = 'File Selected: ' + filename;
+            uploadSubtext.textContent = 'Click to change file or submit to analyze';
+        }
+
+        // Form submission with progress simulation
+        form.addEventListener('submit', (e) => {
+            if (fileInput.files.length > 0) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '⏳ Processing...';
+                progressContainer.style.display = 'block';
+                
+                // Simulate upload progress
+                let progress = 0;
+                const progressBar = document.querySelector('.progress-bar');
+                const interval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    progressBar.style.width = progress + '%';
+                    
+                    if (progress >= 90) {
+                        clearInterval(interval);
+                        progressBar.style.width = '100%';
+                    }
+                }, 200);
+            }
+        });
+    </script>
+</body>
+</html>
